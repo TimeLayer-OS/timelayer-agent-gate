@@ -1,0 +1,12 @@
+[package]
+name = "tl-gate-core"
+description = "TL-Gate core: canonical ActionIntent, BLAKE3 commitments, gate decisions, chain states"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+blake3 = "1"

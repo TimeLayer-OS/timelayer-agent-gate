@@ -1,0 +1,31 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://timelayer-os.com/schemas/tl-gate/action-intent-v1.json",
+  "title": "tl-gate.action-intent/1 (provisional until TL-GATE-WIRE/v1 freeze)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema", "principal", "orchestrator", "agent_instance", "session_ref",
+    "capability", "target", "arguments_digest", "tool_id", "tool_version",
+    "tool_digest", "side_effect_class", "action_id", "chain_id", "attempt",
+    "parent_digest"
+  ],
+  "properties": {
+    "schema": { "const": "tl-gate.action-intent/1" },
+    "principal": { "type": "string", "minLength": 1 },
+    "orchestrator": { "type": "string", "minLength": 1 },
+    "agent_instance": { "type": "string", "minLength": 1 },
+    "session_ref": { "type": "string", "minLength": 1 },
+    "capability": { "type": "string", "minLength": 1 },
+    "target": { "type": "string" },
+    "arguments_digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "tool_id": { "type": "string", "minLength": 1 },
+    "tool_version": { "type": "string", "minLength": 1 },
+    "tool_digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" },
+    "side_effect_class": { "enum": ["R0", "R1", "W1", "W2", "W3"] },
+    "action_id": { "type": "string", "minLength": 1 },
+    "chain_id": { "type": "string", "minLength": 1 },
+    "attempt": { "type": "integer", "minimum": 1 },
+    "parent_digest": { "type": "string", "pattern": "^$|^[0-9a-f]{64}$" }
+  }
+}

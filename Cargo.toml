@@ -1,0 +1,13 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/tl-gate-core",
+    "crates/tl-gate-verifier-bridge",
+    "crates/tl-gate-cli",
+]
+
+[workspace.package]
+version = "0.0.1"
+edition = "2021"
+license = "Apache-2.0"
+repository = "https://github.com/TimeLayer-OS/timelayer-agent-gate"

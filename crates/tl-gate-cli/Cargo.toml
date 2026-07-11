@@ -1,0 +1,16 @@
+[package]
+name = "tl-gate-cli"
+description = "tl-gate CLI (Phase 0: intent canonicalization + bound verification; everything else fails closed)"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[[bin]]
+name = "tl-gate"
+path = "src/main.rs"
+
+[dependencies]
+tl-gate-core = { path = "../tl-gate-core" }
+tl-gate-verifier-bridge = { path = "../tl-gate-verifier-bridge" }
+serde_json = "1"
