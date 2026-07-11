@@ -1,0 +1,183 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://timelayer-os.com/schemas/tl-gate/scope-receipt-v1.json",
+  "title": "tl-gate.scope_receipt/1",
+  "description": "Proves the exact limits of the action (SPEC §11.2). Scope must be machine-enforced, not merely described. Draft mirror (human-readable) of the wire form. Field set is normative per SPEC.ru.md §10–11; the binary wire encoding of receipts freezes before Phase 0 exit (intent encoding is already frozen in TL-GATE-WIRE-v1.md). Digest notation: b3:<64 lowercase hex> (BLAKE3-256). Consumers reject unknown fields — fail-closed.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "wire",
+    "receipt_kind",
+    "receipt_id",
+    "chain_id",
+    "action_id",
+    "attempt",
+    "principal_id",
+    "agent_instance_id",
+    "orchestrator_id",
+    "subject_digest",
+    "policy_digest",
+    "causal_parent_digest",
+    "previous_receipt_digest",
+    "local_poh_tick",
+    "nonce",
+    "issuer_ref",
+    "receipt_digest",
+    "capability",
+    "resource_namespace",
+    "target_selectors",
+    "allowed_operations",
+    "denied_operations",
+    "network_policy",
+    "path_policy",
+    "data_classification",
+    "max_payload",
+    "max_result",
+    "max_attempts",
+    "validity_window",
+    "revocation_epoch",
+    "human_approval_requirement"
+  ],
+  "properties": {
+    "wire": {
+      "const": "TL-GATE-WIRE:v1"
+    },
+    "receipt_kind": {
+      "enum": [
+        "permission_receipt",
+        "scope_receipt",
+        "tool_receipt",
+        "execution_receipt",
+        "validation_receipt",
+        "final_receipt"
+      ],
+      "const": "scope_receipt"
+    },
+    "receipt_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "chain_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "action_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "attempt": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "principal_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "agent_instance_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "orchestrator_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "subject_digest": {
+      "type": "string",
+      "pattern": "^b3:[0-9a-f]{64}$"
+    },
+    "policy_digest": {
+      "type": "string",
+      "pattern": "^b3:[0-9a-f]{64}$"
+    },
+    "causal_parent_digest": {
+      "type": "string",
+      "pattern": "^$|^b3:[0-9a-f]{64}$"
+    },
+    "previous_receipt_digest": {
+      "type": "string",
+      "pattern": "^$|^b3:[0-9a-f]{64}$"
+    },
+    "local_poh_tick": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "wall_clock_hint": {
+      "type": "string",
+      "description": "Informational only — never the sole authorization criterion (SPEC §10.1, P-11)."
+    },
+    "nonce": {
+      "type": "string",
+      "minLength": 1
+    },
+    "issuer_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "receipt_digest": {
+      "type": "string",
+      "pattern": "^b3:[0-9a-f]{64}$"
+    },
+    "capability": {
+      "type": "string",
+      "minLength": 1
+    },
+    "resource_namespace": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target_selectors": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      },
+      "minItems": 1
+    },
+    "allowed_operations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "denied_operations": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "network_policy": {
+      "type": "object"
+    },
+    "path_policy": {
+      "type": "object"
+    },
+    "data_classification": {
+      "type": "string",
+      "minLength": 1
+    },
+    "max_payload": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "max_result": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "max_attempts": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "validity_window": {
+      "type": "object"
+    },
+    "revocation_epoch": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "human_approval_requirement": {
+      "type": "boolean"
+    }
+  }
+}

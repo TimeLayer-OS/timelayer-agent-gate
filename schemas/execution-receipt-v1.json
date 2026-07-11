@@ -1,0 +1,171 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://timelayer-os.com/schemas/tl-gate/execution-receipt-v1.json",
+  "title": "tl-gate.execution_receipt/1",
+  "description": "Proves one exact execution evidence package was captured (SPEC §11.4). Does NOT declare the result correct. Draft mirror (human-readable) of the wire form. Field set is normative per SPEC.ru.md §10–11; the binary wire encoding of receipts freezes before Phase 0 exit (intent encoding is already frozen in TL-GATE-WIRE-v1.md). Digest notation: b3:<64 lowercase hex> (BLAKE3-256). Consumers reject unknown fields — fail-closed.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "wire",
+    "receipt_kind",
+    "receipt_id",
+    "chain_id",
+    "action_id",
+    "attempt",
+    "principal_id",
+    "agent_instance_id",
+    "orchestrator_id",
+    "subject_digest",
+    "policy_digest",
+    "causal_parent_digest",
+    "previous_receipt_digest",
+    "local_poh_tick",
+    "nonce",
+    "issuer_ref",
+    "receipt_digest",
+    "intent_digest",
+    "permission_digest",
+    "scope_digest",
+    "tool_digest",
+    "exact_input_digest",
+    "execution_environment_digest",
+    "local_poh_start",
+    "local_poh_end",
+    "exit_status",
+    "output_digest",
+    "side_effect_digest",
+    "connector_attestation_digest",
+    "bounded_error_digest"
+  ],
+  "properties": {
+    "wire": {
+      "const": "TL-GATE-WIRE:v1"
+    },
+    "receipt_kind": {
+      "enum": [
+        "permission_receipt",
+        "scope_receipt",
+        "tool_receipt",
+        "execution_receipt",
+        "validation_receipt",
+        "final_receipt"
+      ],
+      "const": "execution_receipt"
+    },
+    "receipt_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "chain_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "action_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "attempt": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "principal_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "agent_instance_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "orchestrator_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "subject_digest": {
+      "type": "string",
+      "pattern": "^b3:[0-9a-f]{64}$"
+    },
+    "policy_digest": {
+      "type": "string",
+      "pattern": "^b3:[0-9a-f]{64}$"
+    },
+    "causal_parent_digest": {
+      "type": "string",
+      "pattern": "^$|^b3:[0-9a-f]{64}$"
+    },
+    "previous_receipt_digest": {
+      "type": "string",
+      "pattern": "^$|^b3:[0-9a-f]{64}$"
+    },
+    "local_poh_tick": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "wall_clock_hint": {
+      "type": "string",
+      "description": "Informational only — never the sole authorization criterion (SPEC §10.1, P-11)."
+    },
+    "nonce": {
+      "type": "string",
+      "minLength": 1
+    },
+    "issuer_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "receipt_digest": {
+      "type": "string",
+      "pattern": "^b3:[0-9a-f]{64}$"
+    },
+    "intent_digest": {
+      "type": "string",
+      "pattern": "^b3:[0-9a-f]{64}$"
+    },
+    "permission_digest": {
+      "type": "string",
+      "pattern": "^b3:[0-9a-f]{64}$"
+    },
+    "scope_digest": {
+      "type": "string",
+      "pattern": "^b3:[0-9a-f]{64}$"
+    },
+    "tool_digest": {
+      "type": "string",
+      "pattern": "^b3:[0-9a-f]{64}$"
+    },
+    "exact_input_digest": {
+      "type": "string",
+      "pattern": "^b3:[0-9a-f]{64}$"
+    },
+    "execution_environment_digest": {
+      "type": "string",
+      "pattern": "^b3:[0-9a-f]{64}$"
+    },
+    "local_poh_start": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "local_poh_end": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "exit_status": {
+      "type": "integer"
+    },
+    "output_digest": {
+      "type": "string",
+      "pattern": "^b3:[0-9a-f]{64}$"
+    },
+    "side_effect_digest": {
+      "type": "string",
+      "pattern": "^b3:[0-9a-f]{64}$"
+    },
+    "connector_attestation_digest": {
+      "type": "string",
+      "pattern": "^$|^b3:[0-9a-f]{64}$"
+    },
+    "bounded_error_digest": {
+      "type": "string",
+      "pattern": "^$|^b3:[0-9a-f]{64}$"
+    }
+  }
+}

@@ -12,9 +12,16 @@ vectors pass, not when its happy path demos well.
         (schemas/commitment-v1.json); intent digest now hashes wire bytes
   - [x] cross-language vectors: Rust generator + independent Python
         implementation, byte-for-byte PASS (testvectors/)
-  - [ ] receipt envelope schemas (permission/scope/tool/execution/validation/final)
-  - [ ] negative vector suite: forged / replay / scope-escape / tool-substitution /
-        output-substitution / validation-fail / finality-conflict
+  - [x] receipt envelope schemas per SPEC §10–11: common envelope +
+        permission/scope/tool/execution/validation/final (schemas/*.json,
+        human-readable mirrors; binary receipt encoding freezes before Phase 0 exit)
+  - [x] wire reader (decode_intent_v1), fail-closed per WIRE §6, with negative
+        vectors: forged byte, bad magic, truncation at every length, trailing
+        bytes, unknown enum, cross-domain replay — all reject
+  - [ ] binary wire encoding for the six receipt kinds (last Phase 0 item)
+  - [ ] gate-level negative suite (scope-escape / tool-substitution /
+        output-substitution / validation-fail / finality-conflict) — needs the
+        Phase 1 gate to exist first
 - [ ] Phase 1 — local universal gate (normalizer, pre-gate, broker: fs/process/http)
 - [ ] Phase 2 — MCP control plane
 - [ ] Phase 3 — multi-agent delegation

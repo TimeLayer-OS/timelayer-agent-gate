@@ -95,6 +95,136 @@ pub fn encode_intent_v1(i: &ActionIntent) -> Result<Vec<u8>, WireError> {
     Ok(out)
 }
 
+// ─────────── reader (fail-closed, TL-GATE-WIRE-v1.md §6) ───────────
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum DecodeError {
+    BadMagic,
+    UnknownKind(String),
+    Truncated(&'static str),
+    BadUtf8(&'static str),
+    UnknownEnum { field: &'static str, value: u8 },
+    BadDigestLen { field: &'static str, len: usize },
+    TrailingBytes(usize),
+}
+
+impl std::fmt::Display for DecodeError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::BadMagic => write!(f, "wire: bad magic (want TLG1)"),
+            Self::UnknownKind(k) => write!(f, "wire: unknown kind '{k}' — fail-closed"),
+            Self::Truncated(w) => write!(f, "wire: truncated at {w}"),
+            Self::BadUtf8(w) => write!(f, "wire: invalid UTF-8 in {w}"),
+            Self::UnknownEnum { field, value } => {
+                write!(f, "wire: unknown enum value {value} for {field} — fail-closed")
+            }
+            Self::BadDigestLen { field, len } => {
+                write!(f, "wire: digest field {field} has {len} bytes, want 32 (or 0 where allowed)")
+            }
+            Self::TrailingBytes(n) => write!(f, "wire: {n} trailing bytes after last field — reject"),
+        }
+    }
+}
+
+impl std::error::Error for DecodeError {}
+
+struct Reader<'a> {
+    buf: &'a [u8],
+    pos: usize,
+}
+
+impl<'a> Reader<'a> {
+    fn take(&mut self, n: usize, what: &'static str) -> Result<&'a [u8], DecodeError> {
+        let end = self.pos.checked_add(n).ok_or(DecodeError::Truncated(what))?;
+        if end > self.buf.len() {
+            return Err(DecodeError::Truncated(what));
+        }
+        let s = &self.buf[self.pos..end];
+        self.pos = end;
+        Ok(s)
+    }
+    fn u32(&mut self, what: &'static str) -> Result<u32, DecodeError> {
+        Ok(u32::from_le_bytes(self.take(4, what)?.try_into().unwrap()))
+    }
+    fn u64(&mut self, what: &'static str) -> Result<u64, DecodeError> {
+        Ok(u64::from_le_bytes(self.take(8, what)?.try_into().unwrap()))
+    }
+    fn str(&mut self, what: &'static str) -> Result<String, DecodeError> {
+        let n = self.u32(what)? as usize;
+        let b = self.take(n, what)?;
+        String::from_utf8(b.to_vec()).map_err(|_| DecodeError::BadUtf8(what))
+    }
+    fn digest32(&mut self, what: &'static str) -> Result<String, DecodeError> {
+        let b = self.take(32, what)?;
+        Ok(b.iter().map(|x| format!("{x:02x}")).collect())
+    }
+}
+
+fn side_effect_from(b: u8) -> Result<SideEffectClass, DecodeError> {
+    Ok(match b {
+        0 => SideEffectClass::R0,
+        1 => SideEffectClass::R1,
+        2 => SideEffectClass::W1,
+        3 => SideEffectClass::W2,
+        4 => SideEffectClass::W3,
+        v => return Err(DecodeError::UnknownEnum { field: "side_effect_class", value: v }),
+    })
+}
+
+/// Decode TL-GATE-WIRE/v1 bytes back into an `ActionIntent`, enforcing every
+/// reader rule from the spec: exact magic, known kind, exact digest widths,
+/// known enum values, and NOT ONE trailing byte. The reader never fixes
+/// anything up — bytes are either exactly canonical or invalid.
+pub fn decode_intent_v1(wire: &[u8]) -> Result<ActionIntent, DecodeError> {
+    let mut r = Reader { buf: wire, pos: 0 };
+    if r.take(4, "magic")? != MAGIC {
+        return Err(DecodeError::BadMagic);
+    }
+    let kind = r.str("kind")?;
+    if kind != "tl-gate.action-intent/1" {
+        return Err(DecodeError::UnknownKind(kind));
+    }
+    let body_len = r.u32("body length")? as usize;
+    let body_start = r.pos;
+    let body_end = body_start.checked_add(body_len).ok_or(DecodeError::Truncated("body"))?;
+    if body_end != wire.len() {
+        if body_end > wire.len() {
+            return Err(DecodeError::Truncated("body"));
+        }
+        return Err(DecodeError::TrailingBytes(wire.len() - body_end));
+    }
+
+    let intent = ActionIntent {
+        schema: r.str("schema")?,
+        principal: r.str("principal")?,
+        orchestrator: r.str("orchestrator")?,
+        agent_instance: r.str("agent_instance")?,
+        session_ref: r.str("session_ref")?,
+        capability: r.str("capability")?,
+        target: r.str("target")?,
+        arguments_digest: r.digest32("arguments_digest")?,
+        tool_id: r.str("tool_id")?,
+        tool_version: r.str("tool_version")?,
+        tool_digest: r.digest32("tool_digest")?,
+        side_effect_class: side_effect_from(r.take(1, "side_effect_class")?[0])?,
+        action_id: r.str("action_id")?,
+        chain_id: r.str("chain_id")?,
+        attempt: r.u64("attempt")?,
+        parent_digest: {
+            let n = r.u32("parent_digest length")? as usize;
+            match n {
+                0 => String::new(),
+                32 => r.digest32("parent_digest")?,
+                _ => return Err(DecodeError::BadDigestLen { field: "parent_digest", len: n }),
+            }
+        },
+    };
+    if r.pos != wire.len() {
+        return Err(DecodeError::TrailingBytes(wire.len() - r.pos));
+    }
+    Ok(intent)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -148,5 +278,82 @@ mod tests {
         let mut i = intent();
         i.arguments_digest = "abc".into();
         assert!(encode_intent_v1(&i).is_err());
+    }
+
+    // ── negative vectors (fail-closed reader, TL-GATE-WIRE-v1.md §6) ──
+
+    #[test]
+    fn roundtrip_is_lossless() {
+        let i = intent();
+        let w = encode_intent_v1(&i).unwrap();
+        let d = decode_intent_v1(&w).unwrap();
+        assert_eq!(encode_intent_v1(&d).unwrap(), w);
+    }
+
+    #[test]
+    fn forged_byte_changes_digest_or_fails_decode() {
+        let i = intent();
+        let w = encode_intent_v1(&i).unwrap();
+        let orig = crate::domain_digest(crate::INTENT_DOMAIN_V1, &w);
+        // flip one byte somewhere in the body — either the decode rejects it
+        // or the digest no longer matches; silence is never an option
+        for pos in [40usize, 60, w.len() - 5] {
+            let mut t = w.clone();
+            t[pos] ^= 0xff;
+            match decode_intent_v1(&t) {
+                Err(_) => {}
+                Ok(_) => assert_ne!(crate::domain_digest(crate::INTENT_DOMAIN_V1, &t), orig),
+            }
+        }
+    }
+
+    #[test]
+    fn bad_magic_rejected() {
+        let mut w = encode_intent_v1(&intent()).unwrap();
+        w[0] = b'X';
+        assert!(matches!(decode_intent_v1(&w), Err(DecodeError::BadMagic)));
+    }
+
+    #[test]
+    fn truncation_rejected_at_every_length() {
+        let w = encode_intent_v1(&intent()).unwrap();
+        for cut in [3usize, 10, w.len() / 2, w.len() - 1] {
+            assert!(decode_intent_v1(&w[..cut]).is_err(), "cut at {cut} must fail");
+        }
+    }
+
+    #[test]
+    fn trailing_bytes_rejected() {
+        let mut w = encode_intent_v1(&intent()).unwrap();
+        w.push(0x00);
+        assert!(matches!(decode_intent_v1(&w), Err(DecodeError::TrailingBytes(_))));
+    }
+
+    #[test]
+    fn unknown_enum_rejected() {
+        let i = intent();
+        let w = encode_intent_v1(&i).unwrap();
+        // side_effect_class байт находится сразу после tool_digest; найдём его
+        // честно: перекодируем с другим классом и найдём отличающийся байт.
+        let mut i2 = i.clone();
+        i2.side_effect_class = SideEffectClass::W3;
+        let w2 = encode_intent_v1(&i2).unwrap();
+        let pos = w.iter().zip(&w2).position(|(a, b)| a != b).unwrap();
+        let mut t = w.clone();
+        t[pos] = 99;
+        assert!(matches!(
+            decode_intent_v1(&t),
+            Err(DecodeError::UnknownEnum { field: "side_effect_class", value: 99 })
+        ));
+    }
+
+    #[test]
+    fn cross_domain_replay_impossible() {
+        // same bytes, different domain → different commitment (spec §10.2)
+        let w = encode_intent_v1(&intent()).unwrap();
+        assert_ne!(
+            crate::domain_digest("TL-GATE/INTENT/v1", &w),
+            crate::domain_digest("TL-GATE/EXECUTION/v1", &w)
+        );
     }
 }

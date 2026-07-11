@@ -1,0 +1,172 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://timelayer-os.com/schemas/tl-gate/final-receipt-v1.json",
+  "title": "tl-gate.final_receipt/1",
+  "description": "Proves a fully-linked chain version passed its validation threshold and got TimeLayer FINAL attestation (SPEC §11.6). A new result version never edits an old final receipt — it starts a new chain and may set supersedes_digest. Draft mirror (human-readable) of the wire form. Field set is normative per SPEC.ru.md §10–11; the binary wire encoding of receipts freezes before Phase 0 exit (intent encoding is already frozen in TL-GATE-WIRE-v1.md). Digest notation: b3:<64 lowercase hex> (BLAKE3-256). Consumers reject unknown fields — fail-closed.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "wire",
+    "receipt_kind",
+    "receipt_id",
+    "chain_id",
+    "action_id",
+    "attempt",
+    "principal_id",
+    "agent_instance_id",
+    "orchestrator_id",
+    "subject_digest",
+    "policy_digest",
+    "causal_parent_digest",
+    "previous_receipt_digest",
+    "local_poh_tick",
+    "nonce",
+    "issuer_ref",
+    "receipt_digest",
+    "chain_root_digest",
+    "intent_digest",
+    "permission_digest",
+    "scope_digest",
+    "tool_digest",
+    "execution_digest",
+    "validation_digest_set",
+    "final_result_digest",
+    "final_status",
+    "supersedes_digest",
+    "local_poh_final_tick",
+    "network_finality_proof_ref"
+  ],
+  "properties": {
+    "wire": {
+      "const": "TL-GATE-WIRE:v1"
+    },
+    "receipt_kind": {
+      "enum": [
+        "permission_receipt",
+        "scope_receipt",
+        "tool_receipt",
+        "execution_receipt",
+        "validation_receipt",
+        "final_receipt"
+      ],
+      "const": "final_receipt"
+    },
+    "receipt_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "chain_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "action_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "attempt": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "principal_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "agent_instance_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "orchestrator_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "subject_digest": {
+      "type": "string",
+      "pattern": "^b3:[0-9a-f]{64}$"
+    },
+    "policy_digest": {
+      "type": "string",
+      "pattern": "^b3:[0-9a-f]{64}$"
+    },
+    "causal_parent_digest": {
+      "type": "string",
+      "pattern": "^$|^b3:[0-9a-f]{64}$"
+    },
+    "previous_receipt_digest": {
+      "type": "string",
+      "pattern": "^$|^b3:[0-9a-f]{64}$"
+    },
+    "local_poh_tick": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "wall_clock_hint": {
+      "type": "string",
+      "description": "Informational only — never the sole authorization criterion (SPEC §10.1, P-11)."
+    },
+    "nonce": {
+      "type": "string",
+      "minLength": 1
+    },
+    "issuer_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "receipt_digest": {
+      "type": "string",
+      "pattern": "^b3:[0-9a-f]{64}$"
+    },
+    "chain_root_digest": {
+      "type": "string",
+      "pattern": "^b3:[0-9a-f]{64}$"
+    },
+    "intent_digest": {
+      "type": "string",
+      "pattern": "^b3:[0-9a-f]{64}$"
+    },
+    "permission_digest": {
+      "type": "string",
+      "pattern": "^b3:[0-9a-f]{64}$"
+    },
+    "scope_digest": {
+      "type": "string",
+      "pattern": "^b3:[0-9a-f]{64}$"
+    },
+    "tool_digest": {
+      "type": "string",
+      "pattern": "^b3:[0-9a-f]{64}$"
+    },
+    "execution_digest": {
+      "type": "string",
+      "pattern": "^b3:[0-9a-f]{64}$"
+    },
+    "validation_digest_set": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^b3:[0-9a-f]{64}$"
+      },
+      "minItems": 1
+    },
+    "final_result_digest": {
+      "type": "string",
+      "pattern": "^b3:[0-9a-f]{64}$"
+    },
+    "final_status": {
+      "enum": [
+        "FINAL"
+      ]
+    },
+    "supersedes_digest": {
+      "type": "string",
+      "pattern": "^$|^b3:[0-9a-f]{64}$"
+    },
+    "local_poh_final_tick": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "network_finality_proof_ref": {
+      "type": "string",
+      "minLength": 1
+    }
+  }
+}

@@ -1,0 +1,164 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://timelayer-os.com/schemas/tl-gate/validation-receipt-v1.json",
+  "title": "tl-gate.validation_receipt/1",
+  "description": "Proves one exact validator checked one exact result digest under one exact policy (SPEC §11.5). A semantic validator must not default to the same agent instance that produced the result. Draft mirror (human-readable) of the wire form. Field set is normative per SPEC.ru.md §10–11; the binary wire encoding of receipts freezes before Phase 0 exit (intent encoding is already frozen in TL-GATE-WIRE-v1.md). Digest notation: b3:<64 lowercase hex> (BLAKE3-256). Consumers reject unknown fields — fail-closed.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "wire",
+    "receipt_kind",
+    "receipt_id",
+    "chain_id",
+    "action_id",
+    "attempt",
+    "principal_id",
+    "agent_instance_id",
+    "orchestrator_id",
+    "subject_digest",
+    "policy_digest",
+    "causal_parent_digest",
+    "previous_receipt_digest",
+    "local_poh_tick",
+    "nonce",
+    "issuer_ref",
+    "receipt_digest",
+    "validator_id",
+    "validator_type",
+    "validator_version_or_model_digest",
+    "validation_policy_digest",
+    "input_result_digest",
+    "evidence_digests",
+    "verdict",
+    "limitations",
+    "human_signer_ref"
+  ],
+  "properties": {
+    "wire": {
+      "const": "TL-GATE-WIRE:v1"
+    },
+    "receipt_kind": {
+      "enum": [
+        "permission_receipt",
+        "scope_receipt",
+        "tool_receipt",
+        "execution_receipt",
+        "validation_receipt",
+        "final_receipt"
+      ],
+      "const": "validation_receipt"
+    },
+    "receipt_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "chain_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "action_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "attempt": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "principal_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "agent_instance_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "orchestrator_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "subject_digest": {
+      "type": "string",
+      "pattern": "^b3:[0-9a-f]{64}$"
+    },
+    "policy_digest": {
+      "type": "string",
+      "pattern": "^b3:[0-9a-f]{64}$"
+    },
+    "causal_parent_digest": {
+      "type": "string",
+      "pattern": "^$|^b3:[0-9a-f]{64}$"
+    },
+    "previous_receipt_digest": {
+      "type": "string",
+      "pattern": "^$|^b3:[0-9a-f]{64}$"
+    },
+    "local_poh_tick": {
+      "type": "integer",
+      "minimum": 0
+    },
+    "wall_clock_hint": {
+      "type": "string",
+      "description": "Informational only — never the sole authorization criterion (SPEC §10.1, P-11)."
+    },
+    "nonce": {
+      "type": "string",
+      "minLength": 1
+    },
+    "issuer_ref": {
+      "type": "string",
+      "minLength": 1
+    },
+    "receipt_digest": {
+      "type": "string",
+      "pattern": "^b3:[0-9a-f]{64}$"
+    },
+    "validator_id": {
+      "type": "string",
+      "minLength": 1
+    },
+    "validator_type": {
+      "enum": [
+        "deterministic",
+        "schema",
+        "tests",
+        "diff_policy",
+        "security_scanner",
+        "model_judge",
+        "human",
+        "external_service"
+      ]
+    },
+    "validator_version_or_model_digest": {
+      "type": "string",
+      "minLength": 1
+    },
+    "validation_policy_digest": {
+      "type": "string",
+      "pattern": "^b3:[0-9a-f]{64}$"
+    },
+    "input_result_digest": {
+      "type": "string",
+      "pattern": "^b3:[0-9a-f]{64}$"
+    },
+    "evidence_digests": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "pattern": "^b3:[0-9a-f]{64}$"
+      }
+    },
+    "verdict": {
+      "enum": [
+        "PASS",
+        "FAIL",
+        "INCONCLUSIVE"
+      ]
+    },
+    "limitations": {
+      "type": "string"
+    },
+    "human_signer_ref": {
+      "type": "string"
+    }
+  }
+}
