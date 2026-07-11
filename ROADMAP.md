@@ -37,8 +37,13 @@ vectors pass, not when its happy path demos well.
         forged cert — all STOP; live e2e ALLOW + STOP on the real network
   - [x] `tl-gate check <workspace> <proposal.json>` — real verifier adapter
   - [ ] action-template binding matcher (slice 2)
-  - [ ] Controlled Tool Broker: fs/process/http (slice 3) — real side effects,
-        exact input/output capture, execution_receipt
+  - [~] Controlled Tool Broker (slice 3): trait Connector + FilesystemConnector
+        (W1) — re-checks the gate before any effect, live-fs symlink-escape
+        refusal, exact input/output/effect digests, execution_receipt chained
+        after the tool receipt; STOP → no effect; wrong connector class fails
+        closed. Process/HTTP connectors next (same trait).
+  - [ ] validation engine + finalizer (Phase 1 tail) — validation_receipt,
+        final_receipt over the completed chain
 - [ ] Phase 2 — MCP control plane
 - [ ] Phase 3 — multi-agent delegation
 - [ ] Phase 4 — Second Brain bridge

@@ -16,10 +16,12 @@
 
 use serde::{Deserialize, Serialize};
 
+pub mod broker;
 pub mod gate;
 pub mod normalizer;
 pub mod receipts;
 pub mod wire;
+pub use broker::{broker_execute, Connector, ExecInput, ExecutionEvidence, FilesystemConnector};
 pub use gate::{pre_gate, BoundReceipt, GateInput, ReceiptVerifier};
 pub use normalizer::{normalize, Proposal};
 pub use receipts::{
