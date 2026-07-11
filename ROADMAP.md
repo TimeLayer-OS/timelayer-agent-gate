@@ -4,7 +4,7 @@ Tracks SPEC §30. One phase at a time; a phase is done when its negative test
 vectors pass, not when its happy path demos well.
 
 - [x] Repository, license, bilingual spec (RU normative, EN by meaning)
-- [ ] **Phase 0 — protocol freeze**
+- [x] **Phase 0 — protocol freeze — COMPLETE 2026-07-11**
   - [x] intent domain separator + canonical digest
   - [x] verifier bridge, bound-only (`--expect` mandatory)
   - [x] **TL-GATE-WIRE/v1 FROZEN 2026-07-11** (schemas/TL-GATE-WIRE-v1.md):
@@ -18,7 +18,10 @@ vectors pass, not when its happy path demos well.
   - [x] wire reader (decode_intent_v1), fail-closed per WIRE §6, with negative
         vectors: forged byte, bad magic, truncation at every length, trailing
         bytes, unknown enum, cross-domain replay — all reject
-  - [ ] binary wire encoding for the six receipt kinds (last Phase 0 item)
+  - [x] binary wire encoding for the six receipt kinds (receipts.rs): envelope
+        §10.1 + payloads §11.1–11.6, fail-closed decoder, per-kind domains,
+        kind-substitution impossible by construction; roundtrip + tamper +
+        truncation + trailing + bad-enum/bool tests for every kind
   - [ ] gate-level negative suite (scope-escape / tool-substitution /
         output-substitution / validation-fail / finality-conflict) — needs the
         Phase 1 gate to exist first

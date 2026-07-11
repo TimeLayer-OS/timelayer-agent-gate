@@ -15,8 +15,12 @@
 
 use serde::{Deserialize, Serialize};
 
+pub mod receipts;
 pub mod wire;
-pub use wire::{encode_intent_v1, WireError};
+pub use receipts::{
+    decode_receipt_v1, encode_receipt_v1, Receipt, ReceiptEnvelope, ReceiptKind,
+};
+pub use wire::{decode_intent_v1, encode_intent_v1, DecodeError, WireError};
 
 /// Domain separator for the intent commitment (spec §9.2).
 pub const INTENT_DOMAIN_V1: &str = "TL-GATE/INTENT/v1";

@@ -23,6 +23,16 @@ All integers are **little-endian, fixed width**. No varints.
 
 Absent optional string = empty `str` (length 0). There is no null.
 
+## 1b. Additional primitives (receipts)
+
+| Type | Encoding |
+|---|---|
+| `i64` | 8 bytes LE, two's complement (used by `exit_status`) |
+| `bool` | `u8`: 0 = false, 1 = true; any other value = reject |
+| `json-str` | a `str` holding canonical JSON (alphabetically sorted keys, no insignificant whitespace) — object-typed policy fields travel as opaque committed text in v1 |
+| `digest?` | optional digest: `u32` length 0 (absent) or 32, then the raw bytes |
+| `list<digest>` | `u32` count, then each digest as 32 raw bytes |
+
 ## 2. Envelope of every wire object
 
 ```text
@@ -66,6 +76,56 @@ Field order is **fixed**; encoders MUST write exactly this sequence:
 
 `intent_digest = BLAKE3-256("TL-GATE/INTENT/v1" || wire_bytes)` — lowercase hex
 when rendered as text.
+
+## 3b. Receipt bodies (six mandatory kinds, SPEC §10–11)
+
+Kind strings: `tl-gate.permission-receipt/1`, `…scope…`, `…tool…`, `…execution…`,
+`…validation…`, `…final…` (same envelope wrapper as §2). Every body starts with
+the **common envelope** in exactly this order (§10.1):
+
+```text
+receipt_id str · chain_id str · action_id str · attempt u64 ·
+principal_id str · agent_instance_id str · orchestrator_id str ·
+subject_digest digest · policy_digest digest ·
+causal_parent_digest digest? · previous_receipt_digest digest? ·
+local_poh_tick u64 · wall_clock_hint str · nonce str · issuer_ref str
+```
+
+`receipt_digest` from §10.1 is NOT encoded — it IS the commitment over the wire
+bytes (`BLAKE3(kind_domain || wire)`); a hash cannot contain itself. It appears
+only in the JSON mirror, computed.
+
+Then the payload, in the exact field order of its SPEC section:
+
+- **permission** (§11.1): capability str · intent_binding enum{exact_intent=0,
+  action_template=1} · action_template_digest digest? · delegation_parent_digest
+  digest? · revocation_epoch u64 · max_attempts u64 ·
+  required_validation_policy_digest digest
+- **scope** (§11.2): capability str · resource_namespace str · target_selectors
+  list<str> · allowed_operations list<str> · denied_operations list<str> ·
+  network_policy json-str · path_policy json-str · data_classification str ·
+  max_payload u64 · max_result u64 · max_attempts u64 · validity_window json-str ·
+  revocation_epoch u64 · human_approval_requirement bool
+- **tool** (§11.3): tool_id str · tool_version str · binary_or_image_digest digest ·
+  connector_id str · connector_version str · input_schema_digest digest ·
+  output_schema_digest digest · environment_profile_digest digest ·
+  secret_handle_policy json-str · allowed_endpoints list<str> · isolation_profile str
+- **execution** (§11.4): intent_digest digest · permission_digest digest ·
+  scope_digest digest · tool_digest digest · exact_input_digest digest ·
+  execution_environment_digest digest · local_poh_start u64 · local_poh_end u64 ·
+  exit_status i64 · output_digest digest · side_effect_digest digest ·
+  connector_attestation_digest digest? · bounded_error_digest digest?
+- **validation** (§11.5): validator_id str · validator_type enum{deterministic=0,
+  schema=1, tests=2, diff_policy=3, security_scanner=4, model_judge=5, human=6,
+  external_service=7} · validator_version_or_model_digest str ·
+  validation_policy_digest digest · input_result_digest digest ·
+  evidence_digests list<digest> · verdict enum{PASS=0, FAIL=1, INCONCLUSIVE=2} ·
+  limitations str · human_signer_ref str
+- **final** (§11.6): chain_root_digest digest · intent_digest digest ·
+  permission_digest digest · scope_digest digest · tool_digest digest ·
+  execution_digest digest · validation_digest_set list<digest> ·
+  final_result_digest digest · supersedes_digest digest? · local_poh_final_tick u64 ·
+  network_finality_proof_ref str
 
 ## 4. Domain separators (frozen set, v1)
 
