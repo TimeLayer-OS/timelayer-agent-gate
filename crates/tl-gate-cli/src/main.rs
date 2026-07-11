@@ -29,7 +29,7 @@ fn main() {
         Some("spec-version") => {
             println!("tl-gate {} (Phase 0)", env!("CARGO_PKG_VERSION"));
             println!("intent domain : {INTENT_DOMAIN_V1}");
-            println!("wire format   : provisional canonical JSON (sorted keys) until TL-GATE-WIRE/v1");
+            println!("wire format   : TL-GATE-WIRE/v1 (frozen 2026-07-11, schemas/TL-GATE-WIRE-v1.md)");
             exit(0);
         }
         Some("help") | Some("--help") | Some("-h") | None => {
@@ -73,8 +73,16 @@ fn cmd_intent_digest(path: Option<&String>) {
             exit(2);
         }
     };
-    println!("{}", intent.intent_digest());
-    exit(0);
+    match intent.intent_digest() {
+        Ok(d) => {
+            println!("{d}");
+            exit(0);
+        }
+        Err(e) => {
+            eprintln!("malformed ActionIntent: {e}");
+            exit(2);
+        }
+    }
 }
 
 fn cmd_verify(args: &[String]) {

@@ -7,12 +7,16 @@
 //! broker, validation, finalization) is NOT here yet — and per the fail-closed
 //! rule, absence of an implemented check means STOP, never silent ALLOW.
 //!
-//! Canonical serialization (provisional until TL-GATE-WIRE/v1 freezes): JSON
-//! with alphabetically sorted keys, no insignificant whitespace, UTF-8. The
-//! digest is BLAKE3-256 over `domain_separator || canonical_bytes`. SHA-256 is
-//! deliberately absent from this crate (spec P-10: BLAKE3 only).
+//! Canonical serialization: TL-GATE-WIRE/v1 (frozen 2026-07-11, see
+//! schemas/TL-GATE-WIRE-v1.md) — length-prefixed deterministic binary; the
+//! JSON form is an informational mirror and is never hashed. The digest is
+//! BLAKE3-256 over `domain_separator || wire_bytes`. SHA-256 is deliberately
+//! absent from this crate (spec P-10: BLAKE3 only).
 
 use serde::{Deserialize, Serialize};
+
+pub mod wire;
+pub use wire::{encode_intent_v1, WireError};
 
 /// Domain separator for the intent commitment (spec §9.2).
 pub const INTENT_DOMAIN_V1: &str = "TL-GATE/INTENT/v1";
@@ -71,24 +75,28 @@ pub struct ActionIntent {
 }
 
 impl ActionIntent {
-    /// Canonical bytes: JSON with alphabetically sorted keys (serde_json's
-    /// default map ordering), no extra whitespace. Provisional wire form
-    /// until TL-GATE-WIRE/v1 (length-prefixed binary) freezes.
-    pub fn canonical_bytes(&self) -> Vec<u8> {
-        // Route through Value to get sorted-key ordering regardless of the
-        // struct's field declaration order.
+    /// Human-readable JSON mirror with alphabetically sorted keys.
+    /// Informational ONLY — never hashed (TL-GATE-WIRE-v1.md: only wire bytes
+    /// are authoritative).
+    pub fn json_mirror(&self) -> Vec<u8> {
         let v: serde_json::Value =
             serde_json::to_value(self).expect("ActionIntent is always serializable");
-        serde_json::to_vec(&v).expect("canonical serialization")
+        serde_json::to_vec(&v).expect("mirror serialization")
+    }
+
+    /// Canonical TL-GATE-WIRE/v1 bytes (frozen 2026-07-11).
+    pub fn wire_bytes(&self) -> Result<Vec<u8>, WireError> {
+        encode_intent_v1(self)
     }
 
     /// The intent commitment: BLAKE3-256 over the domain separator followed
-    /// by the canonical bytes (spec §9.2). Lowercase hex, 64 chars.
-    pub fn intent_digest(&self) -> String {
+    /// by the canonical WIRE bytes (spec §9.2, TL-GATE-WIRE-v1.md §2).
+    /// Lowercase hex, 64 chars. Errors fail closed — no bytes, no digest.
+    pub fn intent_digest(&self) -> Result<String, WireError> {
         let mut hasher = blake3::Hasher::new();
         hasher.update(INTENT_DOMAIN_V1.as_bytes());
-        hasher.update(&self.canonical_bytes());
-        hasher.finalize().to_hex().to_string()
+        hasher.update(&self.wire_bytes()?);
+        Ok(hasher.finalize().to_hex().to_string())
     }
 }
 
@@ -198,27 +206,27 @@ mod tests {
 
     #[test]
     fn digest_is_deterministic() {
-        assert_eq!(intent().intent_digest(), intent().intent_digest());
-        assert_eq!(intent().intent_digest().len(), 64);
+        assert_eq!(intent().intent_digest().unwrap(), intent().intent_digest().unwrap());
+        assert_eq!(intent().intent_digest().unwrap().len(), 64);
     }
 
     #[test]
     fn any_field_change_changes_digest() {
-        let base = intent().intent_digest();
+        let base = intent().intent_digest().unwrap();
         let mut i = intent();
         i.target = "/workspace/project-a/src/lib.rs".into();
-        assert_ne!(base, i.intent_digest());
+        assert_ne!(base, i.intent_digest().unwrap());
         let mut i = intent();
         i.attempt = 2;
-        assert_ne!(base, i.intent_digest());
+        assert_ne!(base, i.intent_digest().unwrap());
         let mut i = intent();
         i.side_effect_class = SideEffectClass::W3;
-        assert_ne!(base, i.intent_digest());
+        assert_ne!(base, i.intent_digest().unwrap());
     }
 
     #[test]
     fn domain_separation_matters() {
-        let bytes = intent().canonical_bytes();
+        let bytes = intent().wire_bytes().unwrap();
         assert_ne!(
             domain_digest("TL-GATE/INTENT/v1", &bytes),
             domain_digest("TL-GATE/EXECUTION/v1", &bytes),
@@ -227,8 +235,8 @@ mod tests {
     }
 
     #[test]
-    fn canonical_bytes_are_key_sorted() {
-        let s = String::from_utf8(intent().canonical_bytes()).unwrap();
+    fn json_mirror_is_key_sorted() {
+        let s = String::from_utf8(intent().json_mirror()).unwrap();
         let a = s.find("\"action_id\"").unwrap();
         let t = s.find("\"tool_id\"").unwrap();
         assert!(a < t, "keys must be alphabetically ordered");

@@ -1,0 +1,53 @@
+{
+  "domain": "TL-GATE/INTENT/v1",
+  "format": "TL-GATE-WIRE/v1",
+  "frozen": "2026-07-11",
+  "vectors": [
+    {
+      "intent": {
+        "action_id": "a1",
+        "agent_instance": "agent:demo#1",
+        "arguments_digest": "1111111111111111111111111111111111111111111111111111111111111111",
+        "attempt": 1,
+        "capability": "filesystem.write",
+        "chain_id": "c1",
+        "orchestrator": "orchestrator:generic",
+        "parent_digest": "",
+        "principal": "user:owner",
+        "schema": "tl-gate.action-intent/1",
+        "session_ref": "s1",
+        "side_effect_class": "W1",
+        "target": "/workspace/demo.txt",
+        "tool_digest": "2222222222222222222222222222222222222222222222222222222222222222",
+        "tool_id": "fs",
+        "tool_version": "1.0.0"
+      },
+      "intent_digest": "8a610c514858957229a9461b511080bf8f61156959b09522a1a2ba6422cfc2b5",
+      "name": "minimal chain root",
+      "wire_hex": "544c473117000000746c2d676174652e616374696f6e2d696e74656e742f31ea00000017000000746c2d676174652e616374696f6e2d696e74656e742f310a000000757365723a6f776e6572140000006f7263686573747261746f723a67656e657269630c0000006167656e743a64656d6f23310200000073311000000066696c6573797374656d2e7772697465130000002f776f726b73706163652f64656d6f2e747874111111111111111111111111111111111111111111111111111111111111111102000000667305000000312e302e30222222222222222222222222222222222222222222222222222222222222222202020000006131020000006331010000000000000000000000"
+    },
+    {
+      "intent": {
+        "action_id": "оплата-1",
+        "agent_instance": "agent:глаз#7",
+        "arguments_digest": "a0b1c2d3e4f5061728394a5b6c7d8e9fa0b1c2d3e4f5061728394a5b6c7d8e9f",
+        "attempt": 3,
+        "capability": "http.post",
+        "chain_id": "цепь-9",
+        "orchestrator": "orchestrator:штаб",
+        "parent_digest": "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff",
+        "principal": "user:владелец",
+        "schema": "tl-gate.action-intent/1",
+        "session_ref": "сессия-42",
+        "side_effect_class": "W3",
+        "target": "https://api.example.com/v1/pay",
+        "tool_digest": "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef",
+        "tool_id": "http-connector",
+        "tool_version": "2.3.1"
+      },
+      "intent_digest": "a624cc7d55048632894d638e4cfae241c593b3f85cbf84a4441861bf680d11de",
+      "name": "unicode + child with parent",
+      "wire_hex": "544c473117000000746c2d676174652e616374696f6e2d696e74656e742f314b01000017000000746c2d676174652e616374696f6e2d696e74656e742f3115000000757365723ad0b2d0bbd0b0d0b4d0b5d0bbd0b5d186150000006f7263686573747261746f723ad188d182d0b0d0b1100000006167656e743ad0b3d0bbd0b0d0b723370f000000d181d0b5d181d181d0b8d18f2d343209000000687474702e706f73741e00000068747470733a2f2f6170692e6578616d706c652e636f6d2f76312f706179a0b1c2d3e4f5061728394a5b6c7d8e9fa0b1c2d3e4f5061728394a5b6c7d8e9f0e000000687474702d636f6e6e6563746f7205000000322e332e31deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef040e000000d0bed0bfd0bbd0b0d182d0b02d310a000000d186d0b5d0bfd18c2d39030000000000000020000000ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff"
+    }
+  ]
+}

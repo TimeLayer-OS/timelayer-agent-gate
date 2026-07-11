@@ -5,9 +5,13 @@ vectors pass, not when its happy path demos well.
 
 - [x] Repository, license, bilingual spec (RU normative, EN by meaning)
 - [ ] **Phase 0 — protocol freeze**
-  - [x] intent domain separator + canonical digest (provisional JSON form)
+  - [x] intent domain separator + canonical digest
   - [x] verifier bridge, bound-only (`--expect` mandatory)
-  - [ ] TL-GATE-WIRE/v1 length-prefixed binary form + cross-language vectors
+  - [x] **TL-GATE-WIRE/v1 FROZEN 2026-07-11** (schemas/TL-GATE-WIRE-v1.md):
+        length-prefixed binary, frozen domain set, typed commitment object
+        (schemas/commitment-v1.json); intent digest now hashes wire bytes
+  - [x] cross-language vectors: Rust generator + independent Python
+        implementation, byte-for-byte PASS (testvectors/)
   - [ ] receipt envelope schemas (permission/scope/tool/execution/validation/final)
   - [ ] negative vector suite: forged / replay / scope-escape / tool-substitution /
         output-substitution / validation-fail / finality-conflict

@@ -1,0 +1,26 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://timelayer-os.com/schemas/tl-gate/commitment-v1.json",
+  "title": "timelayer.commitment/1 — typed commitment (the P0-04 answer)",
+  "description": "A bare 64-hex digest is NOT a commitment. Wherever a commitment crosses a repository or API boundary it travels as this object. Consumers MUST reject unknown schema/domain/hash_alg/canonicalization (fail-closed) and MUST NOT accept a bare hex string where a commitment is expected.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "domain", "hash_alg", "canonicalization", "subject_type", "subject_version", "payload_digest"],
+  "properties": {
+    "schema": { "const": "timelayer.commitment/1" },
+    "domain": {
+      "enum": [
+        "TL-GATE/INTENT/v1", "TL-GATE/PERMISSION/v1", "TL-GATE/SCOPE/v1",
+        "TL-GATE/TOOL/v1", "TL-GATE/EXECUTION/v1", "TL-GATE/VALIDATION/v1",
+        "TL-GATE/FINAL/v1", "TL-GATE/DELEGATION/v1", "TL-GATE/REVOCATION/v1",
+        "TL-GATE/STOP/v1", "TL-GATE/RECOVERY/v1", "TL-GATE/ARGS/v1",
+        "TL-GATE/POLICY/v1", "TL-GATE/CAPSULE/v1"
+      ]
+    },
+    "hash_alg": { "const": "blake3-256" },
+    "canonicalization": { "const": "tl-gate-wire/1" },
+    "subject_type": { "type": "string", "minLength": 1 },
+    "subject_version": { "type": "string", "minLength": 1 },
+    "payload_digest": { "type": "string", "pattern": "^[0-9a-f]{64}$" }
+  }
+}
