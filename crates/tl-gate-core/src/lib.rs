@@ -1,11 +1,12 @@
 //! TL-Gate core: canonical `ActionIntent`, BLAKE3 commitments, gate decisions,
 //! and chain states.
 //!
-//! Status: **Phase 0 (protocol freeze in progress).** What is implemented here
-//! is real and tested: intent canonicalization and the domain-separated BLAKE3
-//! commitment. Everything the spec describes beyond that (receipt resolution,
-//! broker, validation, finalization) is NOT here yet — and per the fail-closed
-//! rule, absence of an implemented check means STOP, never silent ALLOW.
+//! Status: **Phase 0 complete; Phase 1 slice 1.** Implemented and tested:
+//! wire codecs for the intent and all six receipt kinds, the Intent
+//! Normalizer (§8.2) and the Pre-Execution Gate (§8.7) with scope
+//! enforcement, tool binding, and chain integrity. Still absent (and
+//! answering STOP, never a silent ALLOW): the Controlled Tool Broker,
+//! result capture, validation engine, finalizer, capsules.
 //!
 //! Canonical serialization: TL-GATE-WIRE/v1 (frozen 2026-07-11, see
 //! schemas/TL-GATE-WIRE-v1.md) — length-prefixed deterministic binary; the
@@ -15,8 +16,12 @@
 
 use serde::{Deserialize, Serialize};
 
+pub mod gate;
+pub mod normalizer;
 pub mod receipts;
 pub mod wire;
+pub use gate::{pre_gate, BoundReceipt, GateInput, ReceiptVerifier};
+pub use normalizer::{normalize, Proposal};
 pub use receipts::{
     decode_receipt_v1, encode_receipt_v1, Receipt, ReceiptEnvelope, ReceiptKind,
 };

@@ -25,7 +25,20 @@ vectors pass, not when its happy path demos well.
   - [ ] gate-level negative suite (scope-escape / tool-substitution /
         output-substitution / validation-fail / finality-conflict) — needs the
         Phase 1 gate to exist first
-- [ ] Phase 1 — local universal gate (normalizer, pre-gate, broker: fs/process/http)
+- [~] **Phase 1 — local universal gate** (in progress)
+  - [x] Intent Normalizer (§8.2): fs/http/process canonicalization, args digest,
+        content-derived action_id; traversal/relative/dot rejected pre-scope
+  - [x] Pre-Execution Gate (§8.7): mandatory triple via ReceiptVerifier trait
+        (bound-only), exact-intent subject binding, envelope coherence, chain
+        integrity (permission→scope→tool), scope enforcement (selectors +
+        allowed/denied ops), tool binding (id+version+digest), attempt limits
+  - [x] gate negatives: transplant, scope-escape, out-of-scope target,
+        denied op, tool substitution, broken chain, attempt-over-limit,
+        forged cert — all STOP; live e2e ALLOW + STOP on the real network
+  - [x] `tl-gate check <workspace> <proposal.json>` — real verifier adapter
+  - [ ] action-template binding matcher (slice 2)
+  - [ ] Controlled Tool Broker: fs/process/http (slice 3) — real side effects,
+        exact input/output capture, execution_receipt
 - [ ] Phase 2 — MCP control plane
 - [ ] Phase 3 — multi-agent delegation
 - [ ] Phase 4 — Second Brain bridge
