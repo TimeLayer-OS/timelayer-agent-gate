@@ -2,6 +2,12 @@
 
 **English** · [Русский](README.ru.md)
 
+> **FOR AGENTS.** The gate over any agent's side effect, fail-closed:
+> ```bash
+> tl-gate check <workspace> <proposal.json>   # ALLOW | STOP(reason)
+> ```
+> Working method: [`AGENTS.md`](AGENTS.md).
+
 ## In plain words
 
 AI agents can now write files, call APIs, move money. The uncomfortable question
