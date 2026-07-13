@@ -2,6 +2,8 @@
 
 **English** · [Русский](README.ru.md)
 
+[![ci](https://github.com/TimeLayer-OS/timelayer-agent-gate/actions/workflows/ci.yml/badge.svg)](https://github.com/TimeLayer-OS/timelayer-agent-gate/actions/workflows/ci.yml)
+
 > **FOR AGENTS.** The gate over any agent's side effect, fail-closed:
 > ```bash
 > tl-gate check <workspace> <proposal.json>   # ALLOW | STOP(reason)
