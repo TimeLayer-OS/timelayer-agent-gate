@@ -3,6 +3,7 @@
 **English** · [Русский](README.ru.md)
 
 [![ci](https://github.com/TimeLayer-OS/timelayer-agent-gate/actions/workflows/ci.yml/badge.svg)](https://github.com/TimeLayer-OS/timelayer-agent-gate/actions/workflows/ci.yml)
+[![receipt-verified](receipt-verified.svg)](https://github.com/TimeLayer-OS/timelayer-verifier/tree/main/audit/2026-07-14)
 
 > **FOR AGENTS.** The gate over any agent's side effect, fail-closed:
 > ```bash
